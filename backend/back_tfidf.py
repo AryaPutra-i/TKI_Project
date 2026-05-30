@@ -46,10 +46,12 @@ def cari_dokumen(query):
         tf_query_mentah[token] = tf_query_mentah.get(token, 0) + 1
     bobot_tfidf_query = {}
     for token, tf_mentah in tf_query_mentah.items():
-        df_term = len(inverted_index_siap_pakai[token])
+        posting_list = inverted_index_siap_pakai.get(token, {})
+        df_term = len(posting_list)
         idf = math.log10(total_dokumen / df_term) if df_term > 0 else 0
         tf_log = 1 + math.log10(tf_mentah) if tf_mentah > 0 else 0
-        bobot_tfidf_query[token] = tf_log * idf
+        # Jika token tidak ada di inverted index, beri bobot 0.0 untuk menghindari KeyError
+        bobot_tfidf_query[token] = tf_log * idf if df_term > 0 else 0.0
     
     skor_cosine_dokumen = {}
     panjang_vector_query = math.sqrt(sum(bobot ** 2 for bobot in bobot_tfidf_query.values()))
